@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 API_URL = os.getenv("API_URL", "https://projetchurn.onrender.com").rstrip("/")
+XOF_PER_USD = 600  # 1 USD ≈ 600 F CFA (taux indicatif Sénégal)
 
 st.set_page_config(
     page_title="Dashboard Churn Client",
@@ -191,8 +192,8 @@ with st.form("churn_form"):
     with col2:
         tenure = st.slider("Ancienneté (en mois)", min_value=0, max_value=100, value=12,
                            help="Depuis combien de mois le client est-il chez nous ?")
-        MonthlyCharges = st.number_input("Frais mensuels (€)", min_value=0.0, value=30.0, step=1.0)
-        TotalCharges = st.number_input("Total déjà payé (€)", min_value=0.0, value=360.0, step=10.0)
+        MonthlyCharges = st.number_input("Frais mensuels (F CFA)", min_value=0.0, value=20000.0, step=1000.0, format="%.0f")
+        TotalCharges = st.number_input("Total déjà payé (F CFA)", min_value=0.0, value=200000.0, step=10000.0, format="%.0f")
         PhoneService = st.selectbox("Ligne téléphonique ?", ["Oui", "Non"])
         if PhoneService == "Non":
             st.session_state["_multiline"] = "Pas de ligne"
@@ -307,8 +308,8 @@ if submit_button:
         "Contract": MAPPINGS["contract"][Contract],
         "PaperlessBilling": yn(PaperlessBilling),
         "PaymentMethod": MAPPINGS["payment"][PaymentMethod],
-        "MonthlyCharges": MonthlyCharges,
-        "TotalCharges": TotalCharges,
+        "MonthlyCharges": round(MonthlyCharges / XOF_PER_USD, 2),
+        "TotalCharges": round(TotalCharges / XOF_PER_USD, 2),
     }
 
     try:
