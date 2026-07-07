@@ -183,7 +183,7 @@ if page == "Dashboard":
 
     if st.session_state.history:
         st.markdown('<div class="section-header">📈 Dernières analyses</div>', unsafe_allow_html=True)
-        df_show = st.session_state.history_df.tail(5)[["date", "contract", "tenure", "monthly", "score", "statut"]].copy()
+        df_show = st.session_state.history_df.tail(5)[["date", "contract", "tenure", "monthly", "risk_score", "statut"]].copy()
         df_show.columns = ["Date", "Contrat", "Ancienneté", "Mensuel", "Risque", "Statut"]
         df_show["Mensuel"] = df_show["Mensuel"].apply(lambda x: f"{x:,.0f} F CFA")
         df_show["Risque"] = df_show["Risque"].apply(lambda x: f"{x:.1f}%")
