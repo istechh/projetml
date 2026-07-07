@@ -146,7 +146,7 @@ def predict(client: ClientInput):
         client_dict = client.model_dump()
         df_client = pd.DataFrame([client_dict])
 
-        df_encoded = pd.get_dummies(df_client, drop_first=True)
+        df_encoded = pd.get_dummies(df_client, drop_first=True, dtype=int)
 
         X_custom = pd.DataFrame(0, index=[0], columns=model_features)
 
