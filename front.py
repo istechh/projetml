@@ -271,7 +271,7 @@ with st.sidebar:
     if api_ok and api_info:
         st.markdown(
             f'<div style="padding:0 0 16px 6px;font-size:0.78rem;color:rgba(255,255,255,0.6);">'
-            f'<span class="dot green"></span> API connectée &nbsp;·&nbsp; {api_info.get("model_type","")}'
+            f'<span class="dot green"></span> API connectée'
             f'</div>', unsafe_allow_html=True,
         )
     else:
@@ -325,9 +325,8 @@ with tab_dash:
 
     if api_info:
         st.markdown(f'<div style="margin-top:20px;font-size:0.8rem;color:var(--muted);">'
-                    f'Modèle : {api_info.get("model_type")} · '
-                    f'ROC-AUC : {api_info.get("model_roc_auc")} · '
-                    f'Version API : {api_info.get("version")}</div>', unsafe_allow_html=True)
+                    f'Version API : {api_info.get("version")} · '
+                    f'Score de confiance : {float(api_info.get("model_roc_auc",0))*100:.0f}%</div>', unsafe_allow_html=True)
 
 # ==============================
 # TAB: PRÉDICTION
