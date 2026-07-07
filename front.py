@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-API_URL = os.getenv("API_URL", "http://127.0.0.1:8000").rstrip("/")
+API_URL = os.getenv("API_URL", "https://projetchurn.onrender.com").rstrip("/")
 
 st.set_page_config(
     page_title="Dashboard Churn Client",
