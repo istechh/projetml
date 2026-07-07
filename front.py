@@ -198,10 +198,20 @@ div[data-testid="stSidebarNav"] { display: none; }
 # --- Session state ---
 if "page" not in st.session_state:
     st.session_state.page = "Dashboard"
-if "history" not in st.session_state:
+def load_history():
+    try:
+        r = requests.get(f"{API_URL}/history", timeout=5)
+        if r.status_code == 200:
+            data = r.json().get("history", [])
+            st.session_state.history = data
+            st.session_state.history_df = pd.DataFrame(data)
+            return
+    except Exception:
+        pass
     st.session_state.history = []
-if "history_df" not in st.session_state:
     st.session_state.history_df = pd.DataFrame()
+
+load_history()
 
 # --- API check ---
 api_ok = False
@@ -430,6 +440,10 @@ elif page == "Prédiction":
                     "churn_probability": proba, "risk_score": score,
                     "statut": "Risque élevé" if is_risk else "Stable",
                 }
+                try:
+                    requests.post(f"{API_URL}/history", json=record, timeout=5)
+                except Exception:
+                    pass
                 st.session_state.history.append(record)
                 df_new = pd.DataFrame([record])
                 st.session_state.history_df = pd.concat([st.session_state.history_df, df_new], ignore_index=True)

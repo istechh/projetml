@@ -6,6 +6,8 @@ import pandas as pd
 import numpy as np
 import json
 import os
+from typing import Optional
+from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -45,6 +47,24 @@ if requires_scaler:
         scaler = joblib.load(SCALER_PATH)
     except Exception as e:
         raise RuntimeError(f"Impossible de charger le scaler depuis {SCALER_PATH}: {e}")
+
+HISTORY_FILE = "history.json"
+_history: list = []
+
+def _load_history():
+    global _history
+    if os.path.exists(HISTORY_FILE):
+        try:
+            with open(HISTORY_FILE) as f:
+                _history = json.load(f)
+        except Exception:
+            _history = []
+
+def _save_history():
+    with open(HISTORY_FILE, "w") as f:
+        json.dump(_history, f, indent=2, default=str)
+
+_load_history()
 
 VALID_BOOLEAN = {"Yes", "No"}
 VALID_GENDER = {"Male", "Female"}
@@ -136,9 +156,45 @@ def home():
         "model_roc_auc": metadata.get("roc_auc", "unknown"),
     }
 
+class HistoryRecord(BaseModel):
+    date: str
+    gender: str
+    senior: int
+    partner: str
+    dependents: str
+    tenure: int
+    contract: str
+    payment: str
+    monthly: float
+    total: float
+    churn_prediction: int
+    churn_probability: float
+    risk_score: float
+    statut: str
+
+class HistoryResponse(BaseModel):
+    history: list
+    count: int
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+@app.get("/history")
+def get_history():
+    return HistoryResponse(history=_history, count=len(_history))
+
+@app.post("/history")
+def add_history(record: HistoryRecord):
+    _history.append(record.model_dump())
+    _save_history()
+    return {"status": "ok", "index": len(_history) - 1}
+
+@app.delete("/history")
+def clear_history():
+    _history.clear()
+    _save_history()
+    return {"status": "ok", "message": "Historique effacé"}
 
 @app.post("/predict")
 def predict(client: ClientInput):
