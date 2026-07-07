@@ -28,11 +28,37 @@ st.markdown("""
     }
     .result-card.stable { background-color: #e8f5e9; border-color: #2e7d32; }
     .result-card.risk { background-color: #ffebee; border-color: #c62828; }
+    .api-info { background-color: #e3f2fd; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; border-left: 4px solid #1a73e8; }
     </style>
 """, unsafe_allow_html=True)
 
 st.title("🔮 Analyse du Risque de Départ Client")
 st.write("Renseignez les informations du client ci-dessous pour évaluer la probabilité qu'il quitte l'entreprise.")
+
+# --- Health check & infos API ---
+api_ok = False
+api_info = None
+try:
+    r = requests.get(f"{API_URL}/", timeout=5)
+    if r.status_code == 200:
+        api_info = r.json()
+        api_ok = True
+except Exception:
+    pass
+
+if not api_ok:
+    st.error(f"⚠️ Impossible de contacter l'API sur {API_URL}. Vérifiez que `uvicorn app:app` est lancé.")
+    st.stop()
+
+if api_info:
+    st.markdown(
+        f'<div class="api-info">'
+        f"🧠 Modèle : <strong>{api_info.get('model_type', 'N/A')}</strong> &nbsp;·&nbsp; "
+        f"ROC-AUC : <strong>{api_info.get('model_roc_auc', 'N/A')}</strong> &nbsp;·&nbsp; "
+        f"Version API : <strong>{api_info.get('version', 'N/A')}</strong>"
+        f"</div>",
+        unsafe_allow_html=True,
+    )
 
 st.markdown("---")
 
@@ -58,12 +84,20 @@ with st.form("churn_form"):
         ])
 
     with col2:
-        tenure = st.slider("Ancienneté (en mois)", min_value=0, max_value=72, value=12,
+        tenure = st.slider("Ancienneté (en mois)", min_value=0, max_value=100, value=12,
                            help="Depuis combien de mois le client est-il chez nous ?")
         MonthlyCharges = st.number_input("Frais mensuels (€)", min_value=0.0, value=30.0, step=1.0)
         TotalCharges = st.number_input("Total déjà payé (€)", min_value=0.0, value=360.0, step=10.0)
         PhoneService = st.selectbox("Ligne téléphonique ?", ["Oui", "Non"])
-        MultipleLines = st.selectbox("Plusieurs lignes ?", ["Pas de ligne", "Non", "Oui"])
+        if PhoneService == "Non":
+            st.session_state["_multiline"] = "Pas de ligne"
+        MultipleLines = st.selectbox(
+            "Plusieurs lignes ?",
+            ["Pas de ligne", "Non", "Oui"],
+            disabled=PhoneService == "Non",
+            key="_multiline",
+            help="Se désactive et se réinitialise à 'Pas de ligne' quand 'Ligne téléphonique' est sur 'Non'.",
+        )
         InternetService = st.selectbox("Connexion Internet", ["ADSL/DSL", "Fibre optique", "Pas d'Internet"])
 
     st.subheader("📡 Services additionnels")
