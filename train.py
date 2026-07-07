@@ -98,7 +98,7 @@ print(f"ROC-AUC moyen (CV 5-fold) : {cv_lr.mean():.4f} (+/- {cv_lr.std():.4f})")
 print("\n>>> Random Forest (class_weight='balanced')")
 rf = RandomForestClassifier(
     n_estimators=200, max_depth=10, min_samples_leaf=5,
-    class_weight='balanced', random_state=RANDOM_STATE, n_jobs=-1
+    class_weight='balanced_subsample', random_state=RANDOM_STATE, n_jobs=-1
 )
 rf.fit(X_train_encoded, y_train)
 

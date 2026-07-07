@@ -37,6 +37,6 @@
     "MonthlyCharges",
     "TotalCharges"
   ],
-  "roc_auc": 0.8443,
+  "roc_auc": 0.8442,
   "requires_scaler": false
 }

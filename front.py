@@ -132,6 +132,13 @@ div[data-testid="stSidebarNav"] { display: none; }
 .result-card h3 { font-size: 1.05rem; margin: 0; }
 .result-card p { font-size: 0.88rem; }
 
+/* ---------- Tabs (mobile-friendly) ---------- */
+.stTabs [data-baseweb="tab-list"] { gap: 0; }
+.stTabs [data-baseweb="tab"] {
+    font-size: 0.85rem; font-weight: 500; padding: 8px 14px;
+}
+.stTabs [aria-selected="true"] { font-weight: 600; }
+
 /* ---------- Badge API ---------- */
 .api-badge {
     display: inline-flex; align-items: center; gap: 6px;
@@ -187,6 +194,9 @@ div[data-testid="stSidebarNav"] { display: none; }
         font-size: 0.78rem !important;
     }
 
+    .stTabs [data-baseweb="tab"] { font-size: 0.75rem; padding: 6px 10px; }
+    .stTabs [data-baseweb="tab-list"] { gap: 2px; overflow-x: auto; }
+
     .result-card { flex-direction: row; align-items: center; gap: 10px; padding: 10px 12px; margin-top: 10px; }
     .result-card h3 { font-size: 0.85rem; }
     .result-card p { font-size: 0.76rem; margin: 2px 0 0 0 !important; }
@@ -225,8 +235,6 @@ div[data-testid="stSidebarNav"] { display: none; }
 """, unsafe_allow_html=True)
 
 # --- Session state ---
-if "page" not in st.session_state:
-    st.session_state.page = "Dashboard"
 def load_history():
     try:
         r = requests.get(f"{API_URL}/history", timeout=5)
@@ -253,7 +261,7 @@ try:
 except Exception:
     pass
 
-# --- Sidebar ---
+# --- Sidebar (branding only) ---
 with st.sidebar:
     st.markdown(
         f'<div class="sidebar-brand">{ICONS["logo"]}<div><h2>Churn Intelligence</h2>'
@@ -272,18 +280,15 @@ with st.sidebar:
             f'<span class="dot red"></span> API hors ligne'
             f'</div>', unsafe_allow_html=True,
         )
-
-    for page_name in ["Dashboard", "Prédiction", "Analyses"]:
-        if st.button(page_name, key=f"nav_{page_name}", use_container_width=True):
-            st.session_state.page = page_name
-            st.rerun()
-
     st.markdown('<div class="sidebar-footer">v2.0 · Sénégal</div>', unsafe_allow_html=True)
 
-# --- Pages ---
-page = st.session_state.page
+# --- Tabs (mobile-friendly navigation) ---
+tab_dash, tab_predict, tab_analyses = st.tabs(["📊 Dashboard", "🔍 Prédiction", "📈 Analyses"])
 
-if page == "Dashboard":
+# ==============================
+# TAB: DASHBOARD
+# ==============================
+with tab_dash:
     c1, c2 = st.columns(2)
     risky = sum(1 for h in st.session_state.history if h.get("churn_prediction") == 1)
     stable = sum(1 for h in st.session_state.history if h.get("churn_prediction") == 0)
@@ -316,7 +321,7 @@ if page == "Dashboard":
         st.dataframe(df_show, use_container_width=True, hide_index=True,
                      column_config={"Statut": st.column_config.Column(width="small")})
     else:
-        st.info("💡 Aucune analyse pour l'instant. Va dans **Prédiction** pour évaluer un client.")
+        st.info("💡 Aucune analyse pour l'instant. Va dans l'onglet **Prédiction** pour évaluer un client.")
 
     if api_info:
         st.markdown(f'<div style="margin-top:20px;font-size:0.8rem;color:var(--muted);">'
@@ -324,49 +329,57 @@ if page == "Dashboard":
                     f'ROC-AUC : {api_info.get("model_roc_auc")} · '
                     f'Version API : {api_info.get("version")}</div>', unsafe_allow_html=True)
 
-elif page == "Prédiction":
+# ==============================
+# TAB: PRÉDICTION
+# ==============================
+with tab_predict:
     if not api_ok:
         st.error(f"⚠️ Impossible de contacter l'API sur {API_URL}. Vérifiez que l'API est lancée.")
         st.stop()
 
     with st.form("churn_form"):
-        col_left, col_right = st.columns([1, 1])
-        with col_left:
-            st.markdown("**Profil & Contrat**")
+        st.markdown("**👤 Profil & Contrat**")
+        c_prof = st.columns(2)
+        with c_prof[0]:
             gender = st.selectbox("Sexe", ["Homme", "Femme"])
-            SeniorCitizen = st.selectbox("Tranche d'âge", [0, 1],
+            SeniorCitizen = st.selectbox("Âge", [0, 1],
                                          format_func=lambda x: "Moins de 65 ans" if x == 0 else "65 ans ou plus")
             Partner = st.selectbox("En couple ?", ["Oui", "Non"])
+        with c_prof[1]:
             Dependents = st.selectbox("Personnes à charge ?", ["Oui", "Non"])
-            Contract = st.selectbox("Type de contrat",
-                                    ["Mensuel (sans engagement)", "Engagement 1 an", "Engagement 2 ans"])
-            tenure = st.slider("Ancienneté (en mois)", 0, 100, 12)
-        with col_right:
-            st.markdown("**Facturation**")
+            Contract = st.selectbox("Contrat", ["Mensuel (sans engagement)", "Engagement 1 an", "Engagement 2 ans"])
+            tenure = st.slider("Ancienneté (mois)", 0, 100, 12)
+
+        st.markdown("**💳 Facturation**")
+        c_bill = st.columns(2)
+        with c_bill[0]:
             PaperlessBilling = st.selectbox("Facture dématérialisée ?", ["Oui", "Non"])
+            MonthlyCharges = st.number_input("Frais mensuels (F CFA)", 0.0, 200000.0, 20000.0, 1000.0, format="%.0f")
+        with c_bill[1]:
             PaymentMethod = st.selectbox("Mode de paiement", [
                 "Wave / Orange Money", "Chèque envoyé par courrier",
                 "Virement bancaire automatique", "Carte bancaire (prélèvement automatique)",
             ])
-            MonthlyCharges = st.number_input("Frais mensuels (F CFA)", 0.0, 200000.0, 20000.0, 1000.0, format="%.0f")
             TotalCharges = st.number_input("Total déjà payé (F CFA)", 0.0, 10000000.0, 200000.0, 10000.0, format="%.0f")
 
-        st.markdown("---")
-        col_tel, col_inet = st.columns([1, 1])
-        with col_tel:
-            st.markdown("**Téléphonie**")
+        st.markdown("**📞 Téléphonie**")
+        c_tel = st.columns(2)
+        with c_tel[0]:
             PhoneService = st.selectbox("Ligne téléphonique ?", ["Oui", "Non"])
-            MultipleLines = st.selectbox("Plusieurs lignes ?",
-                                         ["Pas de ligne", "Non", "Oui"])
-        with col_inet:
-            st.markdown("**Internet**")
+        with c_tel[1]:
+            MultipleLines = st.selectbox("Plusieurs lignes ?", ["Pas de ligne", "Non", "Oui"])
+
+        with st.expander("🌐 Services Internet", expanded=True):
             InternetService = st.selectbox("Connexion", ["ADSL/DSL", "Fibre optique", "Pas d'Internet"])
-            OnlineSecurity = st.selectbox("Sécurité en ligne", ["Pas d'Internet", "Non", "Oui"])
-            OnlineBackup = st.selectbox("Sauvegarde en ligne", ["Pas d'Internet", "Non", "Oui"])
-            DeviceProtection = st.selectbox("Protection appareil", ["Pas d'Internet", "Non", "Oui"])
-            TechSupport = st.selectbox("Support technique", ["Pas d'Internet", "Non", "Oui"])
-            StreamingTV = st.selectbox("TV en streaming", ["Pas d'Internet", "Non", "Oui"])
-            StreamingMovies = st.selectbox("Films en streaming", ["Pas d'Internet", "Non", "Oui"])
+            c_svc = st.columns(2)
+            with c_svc[0]:
+                OnlineSecurity = st.selectbox("Sécurité en ligne", ["Pas d'Internet", "Non", "Oui"])
+                OnlineBackup = st.selectbox("Sauvegarde en ligne", ["Pas d'Internet", "Non", "Oui"])
+                DeviceProtection = st.selectbox("Protection appareil", ["Pas d'Internet", "Non", "Oui"])
+            with c_svc[1]:
+                TechSupport = st.selectbox("Support technique", ["Pas d'Internet", "Non", "Oui"])
+                StreamingTV = st.selectbox("TV en streaming", ["Pas d'Internet", "Non", "Oui"])
+                StreamingMovies = st.selectbox("Films en streaming", ["Pas d'Internet", "Non", "Oui"])
 
         submitted = st.form_submit_button("Analyser ce client", use_container_width=True)
 
@@ -479,7 +492,10 @@ elif page == "Prédiction":
         except Exception as e:
             st.error(f"⚠️ Erreur : {e}")
 
-elif page == "Analyses":
+# ==============================
+# TAB: ANALYSES
+# ==============================
+with tab_analyses:
     st.markdown(f'<div class="section-header">{icon("chart")} Analyse des prédictions</div>', unsafe_allow_html=True)
 
     if not st.session_state.history:

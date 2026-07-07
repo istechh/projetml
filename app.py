@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import json
 import os
+import sqlite3
 from typing import Optional
 from datetime import datetime
 from dotenv import load_dotenv
@@ -48,23 +49,48 @@ if requires_scaler:
     except Exception as e:
         raise RuntimeError(f"Impossible de charger le scaler depuis {SCALER_PATH}: {e}")
 
-HISTORY_FILE = "history.json"
-_history: list = []
+DB_PATH = os.getenv("DB_PATH", "churn.db")
+
+def get_db():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date TEXT, gender TEXT, senior INTEGER,
+            partner TEXT, dependents TEXT, tenure INTEGER,
+            contract TEXT, payment TEXT, monthly REAL,
+            total REAL, churn_prediction INTEGER,
+            churn_probability REAL, risk_score REAL, statut TEXT
+        )
+    """)
+    conn.commit()
+    return conn
 
 def _load_history():
-    global _history
-    if os.path.exists(HISTORY_FILE):
-        try:
-            with open(HISTORY_FILE) as f:
-                _history = json.load(f)
-        except Exception:
-            _history = []
+    conn = get_db()
+    rows = conn.execute("SELECT * FROM history ORDER BY id").fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
 
-def _save_history():
-    with open(HISTORY_FILE, "w") as f:
-        json.dump(_history, f, indent=2, default=str)
+def _save_record(record: dict):
+    conn = get_db()
+    conn.execute("""
+        INSERT INTO history (date, gender, senior, partner, dependents,
+            tenure, contract, payment, monthly, total,
+            churn_prediction, churn_probability, risk_score, statut)
+        VALUES (:date, :gender, :senior, :partner, :dependents,
+            :tenure, :contract, :payment, :monthly, :total,
+            :churn_prediction, :churn_probability, :risk_score, :statut)
+    """, record)
+    conn.commit()
+    conn.close()
 
-_load_history()
+def _clear_history():
+    conn = get_db()
+    conn.execute("DELETE FROM history")
+    conn.commit()
+    conn.close()
 
 VALID_BOOLEAN = {"Yes", "No"}
 VALID_GENDER = {"Male", "Female"}
@@ -182,18 +208,17 @@ def health():
 
 @app.get("/history")
 def get_history():
-    return HistoryResponse(history=_history, count=len(_history))
+    data = _load_history()
+    return HistoryResponse(history=data, count=len(data))
 
 @app.post("/history")
 def add_history(record: HistoryRecord):
-    _history.append(record.model_dump())
-    _save_history()
-    return {"status": "ok", "index": len(_history) - 1}
+    _save_record(record.model_dump())
+    return {"status": "ok"}
 
 @app.delete("/history")
 def clear_history():
-    _history.clear()
-    _save_history()
+    _clear_history()
     return {"status": "ok", "message": "Historique effacé"}
 
 @app.post("/predict")
