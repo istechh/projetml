@@ -147,12 +147,7 @@ def predict(client: ClientInput):
         df_client = pd.DataFrame([client_dict])
 
         df_encoded = pd.get_dummies(df_client, drop_first=True, dtype=int)
-
-        X_custom = pd.DataFrame(0, index=[0], columns=model_features)
-
-        for col in df_encoded.columns:
-            if col in X_custom.columns:
-                X_custom[col] = df_encoded[col].values
+        X_custom = df_encoded.reindex(columns=model_features, fill_value=0)
 
         if scaler is not None:
             X_custom[num_cols] = scaler.transform(X_custom[num_cols])
