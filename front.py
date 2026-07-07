@@ -16,7 +16,7 @@ st.set_page_config(
     page_title="Churn Intelligence",
     page_icon="📊",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
 # ---------------------------------------------------------------------------
@@ -163,34 +163,63 @@ div[data-testid="stSidebarNav"] { display: none; }
    RESPONSIVE MOBILE
    --------------------------------------------------------------------- */
 @media (max-width: 768px) {
-    .main > .block-container { padding: 1rem 0.9rem 2rem 0.9rem; }
+    .main > .block-container { padding: 0.6rem 0.6rem 2rem 0.6rem; max-width: 100%; }
 
-    h1, h2 { font-size: 1.25rem !important; }
-    .section-header { font-size: 0.92rem; margin: 18px 0 10px 0; }
+    h1, h2 { font-size: 1.05rem !important; }
+    .section-header { font-size: 0.82rem; margin: 12px 0 8px 0; }
+    .section-header svg { display: none; }
 
-    .sidebar-brand h2 { font-size: 0.95rem; }
-    .sidebar-brand p { font-size: 0.7rem; }
+    .sidebar-brand { padding: 2px 0 12px 4px; margin-bottom: 10px; }
+    .sidebar-brand h2 { font-size: 0.85rem; }
+    .sidebar-brand p { font-size: 0.65rem; }
+    .sidebar-footer { font-size: 0.6rem; margin-top: 12px; padding-top: 8px; }
+    [data-testid="stSidebar"] .stButton > button { padding: 6px 10px !important; font-size: 0.8rem !important; }
 
-    .kpi-card { padding: 12px 14px; margin-bottom: 10px; }
-    .kpi-value { font-size: 1.25rem; }
-    .kpi-label { font-size: 0.72rem; }
-    .kpi-sub { font-size: 0.7rem; }
+    .kpi-card { padding: 10px 12px; margin-bottom: 6px; }
+    .kpi-value { font-size: 1.1rem; margin-top: 2px; }
+    .kpi-label { font-size: 0.7rem; }
+    .kpi-label svg { width: 13px; height: 13px; }
+    .kpi-sub { font-size: 0.65rem; }
 
-    .stForm { padding: 14px; }
+    .stForm { padding: 10px; }
+    .stForm strong { font-size: 0.82rem; }
+    .stForm .stSelectbox label, .stForm .stSlider label, .stForm .stNumberInput label {
+        font-size: 0.78rem !important;
+    }
 
-    .result-card { flex-direction: column; align-items: flex-start; text-align: left; gap: 8px; padding: 14px; }
-    .result-card h3 { font-size: 0.95rem; }
-    .result-card p { font-size: 0.82rem; }
+    .result-card { flex-direction: row; align-items: center; gap: 10px; padding: 10px 12px; margin-top: 10px; }
+    .result-card h3 { font-size: 0.85rem; }
+    .result-card p { font-size: 0.76rem; margin: 2px 0 0 0 !important; }
+    .result-card svg { width: 20px; height: 20px; flex-shrink: 0; }
 
-    .api-badge { font-size: 0.72rem; padding: 5px 10px; flex-wrap: wrap; }
+    .stDataFrame { font-size: 0.72rem !important; }
+    .stDataFrame td, .stDataFrame th { padding: 4px 6px !important; }
 
-    /* Les tableaux/plotly s'adaptent déjà en largeur ; on limite juste la hauteur des titres */
-    .js-plotly-plot .plotly .gtitle { font-size: 12px !important; }
+    .stAlert { font-size: 0.78rem !important; padding: 8px 12px !important; }
+    .stAlert svg { width: 16px !important; height: 16px !important; }
+
+    .stDownloadButton > button { font-size: 0.78rem !important; padding: 6px 12px !important; }
+
+    .api-badge { font-size: 0.65rem; padding: 4px 8px; }
+
+    .js-plotly-plot { max-height: 180px !important; }
+    .js-plotly-plot .plotly .gtitle { font-size: 11px !important; }
+    .js-plotly-plot .plotly .numbershow { font-size: 11px !important; }
+
+    .st-emotion-cache-1bv6p78, .st-emotion-cache-18ni7ap { gap: 0.4rem; }
 }
 
 @media (max-width: 480px) {
-    .kpi-value { font-size: 1.1rem; }
-    .stForm { padding: 12px; }
+    .main > .block-container { padding: 0.4rem 0.4rem 1.5rem 0.4rem; }
+
+    .kpi-card { padding: 8px 10px; }
+    .kpi-value { font-size: 0.95rem; }
+    .kpi-label { font-size: 0.65rem; }
+    .kpi-sub { font-size: 0.6rem; }
+
+    .stForm { padding: 8px; }
+
+    .js-plotly-plot { max-height: 150px !important; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -255,27 +284,25 @@ with st.sidebar:
 page = st.session_state.page
 
 if page == "Dashboard":
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
+    c1, c2 = st.columns(2)
+    risky = sum(1 for h in st.session_state.history if h.get("churn_prediction") == 1)
+    stable = sum(1 for h in st.session_state.history if h.get("churn_prediction") == 0)
+    avg_risk = 0
+    if st.session_state.history:
+        avg_risk = sum(h.get("risk_score", 0) or h.get("churn_probability", 0) * 100 for h in st.session_state.history) / len(st.session_state.history)
+
+    with c1:
         st.markdown(f'<div class="kpi-card"><div class="kpi-label">{icon("users")} Total clients</div>'
                     f'<div class="kpi-value">{len(st.session_state.history) or "—"}</div>'
                     f'<div class="kpi-sub">analysés ce mois</div></div>', unsafe_allow_html=True)
-    with col2:
-        risky = sum(1 for h in st.session_state.history if h.get("churn_prediction") == 1)
+        st.markdown(f'<div class="kpi-card"><div class="kpi-label">{icon("check")} Clients stables</div>'
+                    f'<div class="kpi-value" style="color:var(--success);">{stable or "—"}</div>'
+                    f'<div class="kpi-sub">{f"{stable/len(st.session_state.history)*100:.0f}%" if st.session_state.history else ""}</div></div>', unsafe_allow_html=True)
+    with c2:
         pct = f"{risky/len(st.session_state.history)*100:.0f}%" if st.session_state.history else ""
         st.markdown(f'<div class="kpi-card"><div class="kpi-label">{icon("alert")} Risque élevé</div>'
                     f'<div class="kpi-value" style="color:var(--danger);">{risky or "—"}</div>'
                     f'<div class="kpi-sub">{pct}</div></div>', unsafe_allow_html=True)
-    with col3:
-        stable = sum(1 for h in st.session_state.history if h.get("churn_prediction") == 0)
-        pct2 = f"{stable/len(st.session_state.history)*100:.0f}%" if st.session_state.history else ""
-        st.markdown(f'<div class="kpi-card"><div class="kpi-label">{icon("check")} Clients stables</div>'
-                    f'<div class="kpi-value" style="color:var(--success);">{stable or "—"}</div>'
-                    f'<div class="kpi-sub">{pct2}</div></div>', unsafe_allow_html=True)
-    with col4:
-        avg_risk = 0
-        if st.session_state.history:
-            avg_risk = sum(h.get("risk_score", 0) or h.get("churn_probability", 0) * 100 for h in st.session_state.history) / len(st.session_state.history)
         st.markdown(f'<div class="kpi-card"><div class="kpi-label">{icon("chart")} Risque moyen</div>'
                     f'<div class="kpi-value">{f"{avg_risk:.1f}%" if st.session_state.history else "—"}</div>'
                     f'<div class="kpi-sub">sur tous les clients</div></div>', unsafe_allow_html=True)
@@ -330,18 +357,16 @@ elif page == "Prédiction":
             st.markdown("**Téléphonie**")
             PhoneService = st.selectbox("Ligne téléphonique ?", ["Oui", "Non"])
             MultipleLines = st.selectbox("Plusieurs lignes ?",
-                                         ["Pas de ligne", "Non", "Oui"],
-                                         disabled=PhoneService == "Non")
+                                         ["Pas de ligne", "Non", "Oui"])
         with col_inet:
             st.markdown("**Internet**")
             InternetService = st.selectbox("Connexion", ["ADSL/DSL", "Fibre optique", "Pas d'Internet"])
-            disabled_svc = InternetService == "Pas d'Internet"
-            OnlineSecurity = st.selectbox("Sécurité en ligne", ["Pas d'Internet", "Non", "Oui"], disabled=disabled_svc)
-            OnlineBackup = st.selectbox("Sauvegarde en ligne", ["Pas d'Internet", "Non", "Oui"], disabled=disabled_svc)
-            DeviceProtection = st.selectbox("Protection appareil", ["Pas d'Internet", "Non", "Oui"], disabled=disabled_svc)
-            TechSupport = st.selectbox("Support technique", ["Pas d'Internet", "Non", "Oui"], disabled=disabled_svc)
-            StreamingTV = st.selectbox("TV en streaming", ["Pas d'Internet", "Non", "Oui"], disabled=disabled_svc)
-            StreamingMovies = st.selectbox("Films en streaming", ["Pas d'Internet", "Non", "Oui"], disabled=disabled_svc)
+            OnlineSecurity = st.selectbox("Sécurité en ligne", ["Pas d'Internet", "Non", "Oui"])
+            OnlineBackup = st.selectbox("Sauvegarde en ligne", ["Pas d'Internet", "Non", "Oui"])
+            DeviceProtection = st.selectbox("Protection appareil", ["Pas d'Internet", "Non", "Oui"])
+            TechSupport = st.selectbox("Support technique", ["Pas d'Internet", "Non", "Oui"])
+            StreamingTV = st.selectbox("TV en streaming", ["Pas d'Internet", "Non", "Oui"])
+            StreamingMovies = st.selectbox("Films en streaming", ["Pas d'Internet", "Non", "Oui"])
 
         submitted = st.form_submit_button("Analyser ce client", use_container_width=True)
 
@@ -412,23 +437,21 @@ elif page == "Prédiction":
                 fig.update_layout(height=200, margin=dict(l=20, r=20, t=10, b=10),
                                   paper_bgcolor="rgba(0,0,0,0)", font={"family": "Inter"})
 
-                col_g, col_info = st.columns([1, 1.2])
-                with col_g:
-                    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
-                with col_info:
-                    if is_risk:
-                        st.markdown(
-                            f'<div class="result-card risk">'
-                            f'<div><h3 style="color:var(--danger);">Risque élevé</h3>'
-                            f'<p style="margin:6px 0;">Probabilité de départ : <strong>{score:.1f}%</strong></p>'
-                            f'</div></div>', unsafe_allow_html=True)
-                        st.warning("Proposer une offre de fidélisation ou un engagement avantage tarifaire.")
-                    else:
-                        st.markdown(
-                            f'<div class="result-card stable">'
-                            f'<div><h3 style="color:var(--success);">Client stable</h3>'
-                            f'<p style="margin:6px 0;">Probabilité de départ : <strong>{score:.1f}%</strong></p>'
-                            f'</div></div>', unsafe_allow_html=True)
+                st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+
+                if is_risk:
+                    st.markdown(
+                        f'<div class="result-card risk">'
+                        f'<div><h3 style="color:var(--danger);">Risque élevé</h3>'
+                        f'<p style="margin:6px 0;">Probabilité de départ : <strong>{score:.1f}%</strong></p>'
+                        f'</div></div>', unsafe_allow_html=True)
+                    st.warning("Proposer une offre de fidélisation ou un engagement avantage tarifaire.")
+                else:
+                    st.markdown(
+                        f'<div class="result-card stable">'
+                        f'<div><h3 style="color:var(--success);">Client stable</h3>'
+                        f'<p style="margin:6px 0;">Probabilité de départ : <strong>{score:.1f}%</strong></p>'
+                        f'</div></div>', unsafe_allow_html=True)
 
                 record = {
                     "date": datetime.now().strftime("%d/%m/%Y %H:%M"),
@@ -465,23 +488,22 @@ elif page == "Analyses":
 
     df = st.session_state.history_df
 
-    k1, k2, k3, k4 = st.columns(4)
     total = len(df)
-    n_risky = df["churn_prediction"].sum()
+    n_risky = int(df["churn_prediction"].sum())
     n_stable = total - n_risky
     avg_risk = df["risk_score"].mean()
-    with k1:
+
+    ka, kb = st.columns(2)
+    with ka:
         st.markdown(f'<div class="kpi-card"><div class="kpi-label">{icon("users")} Total</div>'
                     f'<div class="kpi-value">{total}</div></div>', unsafe_allow_html=True)
-    with k2:
-        st.markdown(f'<div class="kpi-card"><div class="kpi-label">{icon("alert")} Risque élevé</div>'
-                    f'<div class="kpi-value" style="color:var(--danger);">{n_risky}</div>'
-                    f'<div class="kpi-sub">{n_risky/total*100:.0f}%</div></div>', unsafe_allow_html=True)
-    with k3:
         st.markdown(f'<div class="kpi-card"><div class="kpi-label">{icon("check")} Stable</div>'
                     f'<div class="kpi-value" style="color:var(--success);">{n_stable}</div>'
                     f'<div class="kpi-sub">{n_stable/total*100:.0f}%</div></div>', unsafe_allow_html=True)
-    with k4:
+    with kb:
+        st.markdown(f'<div class="kpi-card"><div class="kpi-label">{icon("alert")} Risque élevé</div>'
+                    f'<div class="kpi-value" style="color:var(--danger);">{n_risky}</div>'
+                    f'<div class="kpi-sub">{n_risky/total*100:.0f}%</div></div>', unsafe_allow_html=True)
         st.markdown(f'<div class="kpi-card"><div class="kpi-label">{icon("trend")} Risque moyen</div>'
                     f'<div class="kpi-value">{avg_risk:.1f}%</div></div>', unsafe_allow_html=True)
 
