@@ -19,87 +19,178 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# ---------------------------------------------------------------------------
+# ICONES SVG monochromes (un seul ton par contexte -> look sobre et pro)
+# ---------------------------------------------------------------------------
 ICONS = {
-    "logo": """<svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21" stroke="#1a73e8" stroke-width="2" stroke-linecap="round"/>
-        <path d="M12 21C9.5 21 7.2 19.9 5.6 18.1" stroke="#1a73e8" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 4"/>
-        <path d="M12 7V12L15 15" stroke="#1a3c6e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    "logo": """<svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+        <path d="M12 21C9.5 21 7.2 19.9 5.6 18.1" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 4" opacity="0.6"/>
+        <path d="M12 7V12L15 15" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>""",
+    "users": """<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M16 11C17.6569 11 19 9.65685 19 8C19 6.34315 17.6569 5 16 5" stroke="#475569" stroke-width="1.7" stroke-linecap="round"/><path d="M2 19C2 15.6863 5.13401 13 9 13C12.866 13 16 15.6863 16 19" stroke="#475569" stroke-width="1.7" stroke-linecap="round"/><path d="M18 13.5C20.3 14.1 22 16.2 22 18.7" stroke="#475569" stroke-width="1.7" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="#475569" stroke-width="1.7"/></svg>""",
+    "alert": """<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 9V13" stroke="#b91c1c" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="16.3" r="0.9" fill="#b91c1c"/><path d="M10.6 4.7C11.2 3.6 12.8 3.6 13.4 4.7L20.5 17.5C21.1 18.6 20.3 20 19 20H5C3.7 20 2.9 18.6 3.5 17.5L10.6 4.7Z" stroke="#b91c1c" stroke-width="1.6" stroke-linejoin="round"/></svg>""",
+    "check": """<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#15803d" stroke-width="1.6"/><path d="M8 12.5L10.7 15L16 9" stroke="#15803d" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
+    "chart": """<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M4 20V10" stroke="#475569" stroke-width="1.7" stroke-linecap="round"/><path d="M10 20V4" stroke="#475569" stroke-width="1.7" stroke-linecap="round"/><path d="M16 20V13" stroke="#475569" stroke-width="1.7" stroke-linecap="round"/><path d="M2 20H22" stroke="#475569" stroke-width="1.7" stroke-linecap="round"/></svg>""",
+    "trend": """<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M3 17L9 11L13 15L21 7" stroke="#475569" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7H21V13" stroke="#475569" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
+    "list": """<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M8 6H21" stroke="#475569" stroke-width="1.7" stroke-linecap="round"/><path d="M8 12H21" stroke="#475569" stroke-width="1.7" stroke-linecap="round"/><path d="M8 18H21" stroke="#475569" stroke-width="1.7" stroke-linecap="round"/><path d="M3 6H3.01" stroke="#475569" stroke-width="2.2" stroke-linecap="round"/><path d="M3 12H3.01" stroke="#475569" stroke-width="2.2" stroke-linecap="round"/><path d="M3 18H3.01" stroke="#475569" stroke-width="2.2" stroke-linecap="round"/></svg>""",
 }
 
+def icon(name: str) -> str:
+    return ICONS.get(name, "")
+
+# ---------------------------------------------------------------------------
+# STYLE — palette sobre : 1 couleur de marque (navy) + gris neutres + rouge/vert
+# réservés uniquement au statut de risque.
+# ---------------------------------------------------------------------------
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
-.main > .block-container { padding: 1.5rem 2rem; }
 
-[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #0f1a2e 0%, #1a3c6e 100%);
+:root {
+    --navy: #1c3d5a;
+    --navy-dark: #142c40;
+    --ink: #1f2937;
+    --muted: #64748b;
+    --border: #e5e7eb;
+    --bg: #f8fafc;
+    --danger: #dc2626;
+    --danger-bg: #fef2f2;
+    --success: #16a34a;
+    --success-bg: #f0fdf4;
 }
-[data-testid="stSidebar"] .sidebar-content { padding: 1.5rem 1rem; }
+
+html, body, [class*="css"] { font-family: 'Inter', sans-serif; color: var(--ink); }
+.main { background: var(--bg); }
+.main > .block-container { padding: 1.5rem 2rem 2.5rem 2rem; max-width: 1180px; }
+
+/* ---------- Sidebar : couleur unique, plate ---------- */
+[data-testid="stSidebar"] { background: var(--navy); }
+[data-testid="stSidebar"] * { color: rgba(255,255,255,0.92); }
+
 .sidebar-brand {
     display: flex; align-items: center; gap: 10px;
-    padding: 0 0 20px 10px; border-bottom: 1px solid rgba(255,255,255,0.1);
-    margin-bottom: 20px;
+    padding: 4px 0 18px 6px; border-bottom: 1px solid rgba(255,255,255,0.12);
+    margin-bottom: 16px;
 }
-.sidebar-brand h2 { color: white; font-size: 1.1rem; margin: 0; font-weight: 700; }
-.sidebar-brand p { color: rgba(255,255,255,0.5); font-size: 0.75rem; margin: 0; }
+.sidebar-brand h2 { color: #fff; font-size: 1.05rem; margin: 0; font-weight: 700; }
+.sidebar-brand p { color: rgba(255,255,255,0.55); font-size: 0.75rem; margin: 0; }
 
-.stButton > button[kind="secondary"] {
+[data-testid="stSidebar"] .stButton > button {
     background: transparent !important; border: none !important;
-    color: rgba(255,255,255,0.7) !important; text-align: left !important;
-    padding: 10px 14px !important; border-radius: 10px !important;
+    color: rgba(255,255,255,0.75) !important; text-align: left !important;
+    justify-content: flex-start !important;
+    padding: 9px 12px !important; border-radius: 8px !important;
     font-weight: 500 !important; width: 100% !important;
-    transition: all 0.2s ease;
+    transition: background 0.15s ease, color 0.15s ease;
+    box-shadow: none !important;
 }
-.stButton > button[kind="secondary"]:hover {
+[data-testid="stSidebar"] .stButton > button:hover {
     background: rgba(255,255,255,0.08) !important;
-    color: white !important;
-}
-.stButton > button[kind="secondary"] p {
-    font-size: 0.9rem !important;
+    color: #fff !important;
 }
 div[data-testid="stSidebarNav"] { display: none; }
 
-.kpi-card {
-    background: white; padding: 18px 22px; border-radius: 14px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #eef1f6;
+.sidebar-footer {
+    margin-top: 24px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.12);
+    font-size: 0.72rem; color: rgba(255,255,255,0.4);
 }
-.kpi-label { font-size: 0.8rem; color: #6b7a90; font-weight: 500; }
-.kpi-value { font-size: 1.6rem; font-weight: 700; color: #1a3c6e; margin: 4px 0 0 0; }
-.kpi-sub { font-size: 0.78rem; color: #8b9ab0; }
+
+/* ---------- Cartes / KPI : plates, une seule ombre légère ---------- */
+.kpi-card {
+    background: #fff; padding: 16px 18px; border-radius: 10px;
+    border: 1px solid var(--border);
+    height: 100%;
+}
+.kpi-label {
+    font-size: 0.78rem; color: var(--muted); font-weight: 500;
+    display: flex; align-items: center; gap: 6px;
+}
+.kpi-value { font-size: 1.55rem; font-weight: 700; color: var(--ink); margin: 6px 0 0 0; line-height: 1.2; }
+.kpi-sub { font-size: 0.76rem; color: #94a3b8; margin-top: 2px; }
 
 .section-header {
-    font-size: 1.05rem; font-weight: 600; color: #1a3c6e;
-    margin: 24px 0 14px 0; display: flex; align-items: center; gap: 8px;
+    font-size: 1rem; font-weight: 600; color: var(--ink);
+    margin: 26px 0 12px 0; display: flex; align-items: center; gap: 8px;
 }
 
+/* ---------- Formulaires ---------- */
 .stForm {
-    background: white; padding: 24px; border-radius: 16px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid #eef1f6;
+    background: #fff; padding: 22px; border-radius: 12px;
+    border: 1px solid var(--border);
 }
+.stForm h3, .stForm strong { color: var(--ink); }
 
+/* ---------- Résultat de prédiction ---------- */
 .result-card {
-    padding: 20px 24px; border-radius: 14px; margin-top: 16px;
-    border-left: 5px solid; display: flex; align-items: center; gap: 16px;
-    animation: fadeIn 0.4s ease;
+    padding: 18px 20px; border-radius: 10px; margin-top: 14px;
+    border: 1px solid var(--border); border-left: 4px solid;
+    display: flex; align-items: center; gap: 14px;
 }
-.result-card.risk { background: #fef2f2; border-color: #dc2626; }
-.result-card.stable { background: #f0fdf4; border-color: #16a34a; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.result-card.risk { background: var(--danger-bg); border-left-color: var(--danger); }
+.result-card.stable { background: var(--success-bg); border-left-color: var(--success); }
+.result-card h3 { font-size: 1.05rem; margin: 0; }
+.result-card p { font-size: 0.88rem; }
 
+/* ---------- Badge API ---------- */
 .api-badge {
     display: inline-flex; align-items: center; gap: 6px;
-    background: #eef4ff; padding: 6px 14px; border-radius: 20px;
-    font-size: 0.78rem; color: #1a3c6e; border: 1px solid #d6e4ff;
+    background: #fff; padding: 6px 14px; border-radius: 8px;
+    font-size: 0.78rem; color: var(--muted); border: 1px solid var(--border);
 }
-.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-.dot.green { background: #16a34a; box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
-.dot.red { background: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,0.15); }
+.dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.dot.green { background: var(--success); }
+.dot.red { background: var(--danger); }
 
-.history-table {
-    background: white; border-radius: 14px; overflow: hidden;
-    border: 1px solid #eef1f6;
+/* ---------- Boutons génériques (hors sidebar) ---------- */
+.stFormSubmitButton > button {
+    border-radius: 8px !important;
+    background: var(--navy) !important;
+    color: #fff !important; border: none !important;
+    font-weight: 600 !important;
+    transition: background 0.15s ease !important;
+    box-shadow: none !important;
+}
+.stFormSubmitButton > button:hover { background: var(--navy-dark) !important; }
+
+.stDownloadButton > button {
+    border-radius: 8px !important; border: 1px solid var(--border) !important;
+    background: #fff !important; color: var(--ink) !important; font-weight: 500 !important;
+}
+.stDownloadButton > button:hover { background: var(--bg) !important; border-color: var(--navy) !important; }
+
+/* ---------------------------------------------------------------------
+   RESPONSIVE MOBILE
+   --------------------------------------------------------------------- */
+@media (max-width: 768px) {
+    .main > .block-container { padding: 1rem 0.9rem 2rem 0.9rem; }
+
+    h1, h2 { font-size: 1.25rem !important; }
+    .section-header { font-size: 0.92rem; margin: 18px 0 10px 0; }
+
+    .sidebar-brand h2 { font-size: 0.95rem; }
+    .sidebar-brand p { font-size: 0.7rem; }
+
+    .kpi-card { padding: 12px 14px; margin-bottom: 10px; }
+    .kpi-value { font-size: 1.25rem; }
+    .kpi-label { font-size: 0.72rem; }
+    .kpi-sub { font-size: 0.7rem; }
+
+    .stForm { padding: 14px; }
+
+    .result-card { flex-direction: column; align-items: flex-start; text-align: left; gap: 8px; padding: 14px; }
+    .result-card h3 { font-size: 0.95rem; }
+    .result-card p { font-size: 0.82rem; }
+
+    .api-badge { font-size: 0.72rem; padding: 5px 10px; flex-wrap: wrap; }
+
+    /* Les tableaux/plotly s'adaptent déjà en largeur ; on limite juste la hauteur des titres */
+    .js-plotly-plot .plotly .gtitle { font-size: 12px !important; }
+}
+
+@media (max-width: 480px) {
+    .kpi-value { font-size: 1.1rem; }
+    .stForm { padding: 12px; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -132,27 +223,23 @@ with st.sidebar:
     )
     if api_ok and api_info:
         st.markdown(
-            f'<div style="padding:0 0 20px 10px;font-size:0.78rem;">'
+            f'<div style="padding:0 0 16px 6px;font-size:0.78rem;color:rgba(255,255,255,0.6);">'
             f'<span class="dot green"></span> API connectée &nbsp;·&nbsp; {api_info.get("model_type","")}'
             f'</div>', unsafe_allow_html=True,
         )
     else:
         st.markdown(
-            f'<div style="padding:0 0 20px 10px;font-size:0.78rem;">'
+            f'<div style="padding:0 0 16px 6px;font-size:0.78rem;color:rgba(255,255,255,0.6);">'
             f'<span class="dot red"></span> API hors ligne'
             f'</div>', unsafe_allow_html=True,
         )
 
     for page_name in ["Dashboard", "Prédiction", "Analyses"]:
-        if st.button(page_name, key=f"nav_{page_name}", help=f"Accéder à {page_name}"):
+        if st.button(page_name, key=f"nav_{page_name}", use_container_width=True):
             st.session_state.page = page_name
             st.rerun()
 
-    st.markdown(
-        f'<div style="position:absolute;bottom:20px;left:20px;font-size:0.72rem;color:rgba(255,255,255,0.3);">'
-        f'v2.0 · Sénégal</div>',
-        unsafe_allow_html=True,
-    )
+    st.markdown('<div class="sidebar-footer">v2.0 · Sénégal</div>', unsafe_allow_html=True)
 
 # --- Pages ---
 page = st.session_state.page
@@ -160,29 +247,31 @@ page = st.session_state.page
 if page == "Dashboard":
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.markdown(f'<div class="kpi-card"><div class="kpi-label">👥 Total clients</div>'
+        st.markdown(f'<div class="kpi-card"><div class="kpi-label">{icon("users")} Total clients</div>'
                     f'<div class="kpi-value">{len(st.session_state.history) or "—"}</div>'
                     f'<div class="kpi-sub">analysés ce mois</div></div>', unsafe_allow_html=True)
     with col2:
         risky = sum(1 for h in st.session_state.history if h.get("churn_prediction") == 1)
-        st.markdown(f'<div class="kpi-card"><div class="kpi-label">🚨 Risque élevé</div>'
-                    f'<div class="kpi-value" style="color:#dc2626;">{risky or "—"}</div>'
-                    f'<div class="kpi-sub">{f"{risky/len(st.session_state.history)*100:.0f}%" if st.session_state.history else ""}</div></div>', unsafe_allow_html=True)
+        pct = f"{risky/len(st.session_state.history)*100:.0f}%" if st.session_state.history else ""
+        st.markdown(f'<div class="kpi-card"><div class="kpi-label">{icon("alert")} Risque élevé</div>'
+                    f'<div class="kpi-value" style="color:var(--danger);">{risky or "—"}</div>'
+                    f'<div class="kpi-sub">{pct}</div></div>', unsafe_allow_html=True)
     with col3:
         stable = sum(1 for h in st.session_state.history if h.get("churn_prediction") == 0)
-        st.markdown(f'<div class="kpi-card"><div class="kpi-label">✅ Clients stables</div>'
-                    f'<div class="kpi-value" style="color:#16a34a;">{stable or "—"}</div>'
-                    f'<div class="kpi-sub">{f"{stable/len(st.session_state.history)*100:.0f}%" if st.session_state.history else ""}</div></div>', unsafe_allow_html=True)
+        pct2 = f"{stable/len(st.session_state.history)*100:.0f}%" if st.session_state.history else ""
+        st.markdown(f'<div class="kpi-card"><div class="kpi-label">{icon("check")} Clients stables</div>'
+                    f'<div class="kpi-value" style="color:var(--success);">{stable or "—"}</div>'
+                    f'<div class="kpi-sub">{pct2}</div></div>', unsafe_allow_html=True)
     with col4:
         avg_risk = 0
         if st.session_state.history:
             avg_risk = sum(h.get("risk_score", 0) or h.get("churn_probability", 0) * 100 for h in st.session_state.history) / len(st.session_state.history)
-        st.markdown(f'<div class="kpi-card"><div class="kpi-label">📊 Risque moyen</div>'
+        st.markdown(f'<div class="kpi-card"><div class="kpi-label">{icon("chart")} Risque moyen</div>'
                     f'<div class="kpi-value">{f"{avg_risk:.1f}%" if st.session_state.history else "—"}</div>'
                     f'<div class="kpi-sub">sur tous les clients</div></div>', unsafe_allow_html=True)
 
     if st.session_state.history:
-        st.markdown('<div class="section-header">📈 Dernières analyses</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="section-header">{icon("trend")} Dernières analyses</div>', unsafe_allow_html=True)
         df_show = st.session_state.history_df.tail(5)[["date", "contract", "tenure", "monthly", "risk_score", "statut"]].copy()
         df_show.columns = ["Date", "Contrat", "Ancienneté", "Mensuel", "Risque", "Statut"]
         df_show["Mensuel"] = df_show["Mensuel"].apply(lambda x: f"{x:,.0f} F CFA")
@@ -193,8 +282,8 @@ if page == "Dashboard":
         st.info("💡 Aucune analyse pour l'instant. Va dans **Prédiction** pour évaluer un client.")
 
     if api_info:
-        st.markdown(f'<div style="margin-top:24px;font-size:0.8rem;color:#6b7a90;">'
-                    f'🧠 Modèle : {api_info.get("model_type")} · '
+        st.markdown(f'<div style="margin-top:20px;font-size:0.8rem;color:var(--muted);">'
+                    f'Modèle : {api_info.get("model_type")} · '
                     f'ROC-AUC : {api_info.get("model_roc_auc")} · '
                     f'Version API : {api_info.get("version")}</div>', unsafe_allow_html=True)
 
@@ -206,7 +295,7 @@ elif page == "Prédiction":
     with st.form("churn_form"):
         col_left, col_right = st.columns([1, 1])
         with col_left:
-            st.markdown("**👤 Profil & Contrat**")
+            st.markdown("**Profil & Contrat**")
             gender = st.selectbox("Sexe", ["Homme", "Femme"])
             SeniorCitizen = st.selectbox("Tranche d'âge", [0, 1],
                                          format_func=lambda x: "Moins de 65 ans" if x == 0 else "65 ans ou plus")
@@ -216,7 +305,7 @@ elif page == "Prédiction":
                                     ["Mensuel (sans engagement)", "Engagement 1 an", "Engagement 2 ans"])
             tenure = st.slider("Ancienneté (en mois)", 0, 100, 12)
         with col_right:
-            st.markdown("**💳 Facturation**")
+            st.markdown("**Facturation**")
             PaperlessBilling = st.selectbox("Facture dématérialisée ?", ["Oui", "Non"])
             PaymentMethod = st.selectbox("Mode de paiement", [
                 "Wave / Orange Money", "Chèque envoyé par courrier",
@@ -228,13 +317,13 @@ elif page == "Prédiction":
         st.markdown("---")
         col_tel, col_inet = st.columns([1, 1])
         with col_tel:
-            st.markdown("**📞 Téléphonie**")
+            st.markdown("**Téléphonie**")
             PhoneService = st.selectbox("Ligne téléphonique ?", ["Oui", "Non"])
             MultipleLines = st.selectbox("Plusieurs lignes ?",
                                          ["Pas de ligne", "Non", "Oui"],
                                          disabled=PhoneService == "Non")
         with col_inet:
-            st.markdown("**🌐 Internet**")
+            st.markdown("**Internet**")
             InternetService = st.selectbox("Connexion", ["ADSL/DSL", "Fibre optique", "Pas d'Internet"])
             disabled_svc = InternetService == "Pas d'Internet"
             OnlineSecurity = st.selectbox("Sécurité en ligne", ["Pas d'Internet", "Non", "Oui"], disabled=disabled_svc)
@@ -244,7 +333,7 @@ elif page == "Prédiction":
             StreamingTV = st.selectbox("TV en streaming", ["Pas d'Internet", "Non", "Oui"], disabled=disabled_svc)
             StreamingMovies = st.selectbox("Films en streaming", ["Pas d'Internet", "Non", "Oui"], disabled=disabled_svc)
 
-        submitted = st.form_submit_button("🔍 Analyser ce client", use_container_width=True)
+        submitted = st.form_submit_button("Analyser ce client", use_container_width=True)
 
     MAPPINGS = {
         "gender": lambda v: "Male" if v == "Homme" else "Female",
@@ -285,7 +374,7 @@ elif page == "Prédiction":
         }
 
         try:
-            with st.spinner("🔎 Analyse en cours..."):
+            with st.spinner("Analyse en cours..."):
                 resp = requests.post(f"{API_URL}/predict", json=payload, timeout=10)
 
             if resp.status_code == 200:
@@ -297,20 +386,20 @@ elif page == "Prédiction":
                 color = "#dc2626" if is_risk else "#16a34a"
                 fig = go.Figure(go.Indicator(
                     mode="gauge+number", value=score,
-                    number={"suffix": "%", "font": {"size": 44, "color": color, "family": "Inter"}},
+                    number={"suffix": "%", "font": {"size": 40, "color": color, "family": "Inter"}},
                     gauge={
-                        "axis": {"range": [0, 100], "tickwidth": 1, "tickcolor": "#c8d1e0"},
+                        "axis": {"range": [0, 100], "tickwidth": 1, "tickcolor": "#cbd5e1"},
                         "bar": {"color": color, "thickness": 0.25},
                         "bgcolor": "white", "borderwidth": 0,
                         "steps": [
-                            {"range": [0, 40], "color": "#f0fdf4"},
-                            {"range": [40, 70], "color": "#fefce8"},
-                            {"range": [70, 100], "color": "#fef2f2"},
+                            {"range": [0, 40], "color": "#f1f5f9"},
+                            {"range": [40, 70], "color": "#f1f5f9"},
+                            {"range": [70, 100], "color": "#f1f5f9"},
                         ],
-                        "threshold": {"line": {"color": color, "width": 4}, "thickness": 0.8, "value": score},
+                        "threshold": {"line": {"color": color, "width": 3}, "thickness": 0.8, "value": score},
                     },
                 ))
-                fig.update_layout(height=210, margin=dict(l=20, r=20, t=10, b=10),
+                fig.update_layout(height=200, margin=dict(l=20, r=20, t=10, b=10),
                                   paper_bgcolor="rgba(0,0,0,0)", font={"family": "Inter"})
 
                 col_g, col_info = st.columns([1, 1.2])
@@ -320,15 +409,15 @@ elif page == "Prédiction":
                     if is_risk:
                         st.markdown(
                             f'<div class="result-card risk">'
-                            f'<div><h3 style="color:#dc2626;margin:0;">🚨 Risque élevé</h3>'
-                            f'<p style="margin:6px 0;color:#4a4a4a;">Probabilité de départ : <strong>{score:.1f}%</strong></p>'
+                            f'<div><h3 style="color:var(--danger);">Risque élevé</h3>'
+                            f'<p style="margin:6px 0;">Probabilité de départ : <strong>{score:.1f}%</strong></p>'
                             f'</div></div>', unsafe_allow_html=True)
-                        st.warning("💡 Proposer une offre de fidélisation ou un engagement avantage tarifaire.")
+                        st.warning("Proposer une offre de fidélisation ou un engagement avantage tarifaire.")
                     else:
                         st.markdown(
                             f'<div class="result-card stable">'
-                            f'<div><h3 style="color:#16a34a;margin:0;">✅ Client stable</h3>'
-                            f'<p style="margin:6px 0;color:#4a4a4a;">Probabilité de départ : <strong>{score:.1f}%</strong></p>'
+                            f'<div><h3 style="color:var(--success);">Client stable</h3>'
+                            f'<p style="margin:6px 0;">Probabilité de départ : <strong>{score:.1f}%</strong></p>'
                             f'</div></div>', unsafe_allow_html=True)
 
                 record = {
@@ -347,14 +436,14 @@ elif page == "Prédiction":
             else:
                 st.error(f"Erreur API ({resp.status_code}) : {resp.json().get('detail', '')}")
         except requests.exceptions.ConnectionError:
-            st.error(f"⚠️ Impossible de se connecter à l'API.")
+            st.error("⚠️ Impossible de se connecter à l'API.")
         except requests.exceptions.Timeout:
             st.error("⚠️ L'API n'a pas répondu à temps.")
         except Exception as e:
             st.error(f"⚠️ Erreur : {e}")
 
 elif page == "Analyses":
-    st.markdown('<div class="section-header">📊 Analyse des prédictions</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="section-header">{icon("chart")} Analyse des prédictions</div>', unsafe_allow_html=True)
 
     if not st.session_state.history:
         st.info("💡 Aucune donnée pour le moment. Effectue d'abord des prédictions.")
@@ -368,18 +457,18 @@ elif page == "Analyses":
     n_stable = total - n_risky
     avg_risk = df["risk_score"].mean()
     with k1:
-        st.markdown(f'<div class="kpi-card"><div class="kpi-label">👥 Total</div>'
+        st.markdown(f'<div class="kpi-card"><div class="kpi-label">{icon("users")} Total</div>'
                     f'<div class="kpi-value">{total}</div></div>', unsafe_allow_html=True)
     with k2:
-        st.markdown(f'<div class="kpi-card"><div class="kpi-label">🚨 Risque élevé</div>'
-                    f'<div class="kpi-value" style="color:#dc2626;">{n_risky}</div>'
+        st.markdown(f'<div class="kpi-card"><div class="kpi-label">{icon("alert")} Risque élevé</div>'
+                    f'<div class="kpi-value" style="color:var(--danger);">{n_risky}</div>'
                     f'<div class="kpi-sub">{n_risky/total*100:.0f}%</div></div>', unsafe_allow_html=True)
     with k3:
-        st.markdown(f'<div class="kpi-card"><div class="kpi-label">✅ Stable</div>'
-                    f'<div class="kpi-value" style="color:#16a34a;">{n_stable}</div>'
+        st.markdown(f'<div class="kpi-card"><div class="kpi-label">{icon("check")} Stable</div>'
+                    f'<div class="kpi-value" style="color:var(--success);">{n_stable}</div>'
                     f'<div class="kpi-sub">{n_stable/total*100:.0f}%</div></div>', unsafe_allow_html=True)
     with k4:
-        st.markdown(f'<div class="kpi-card"><div class="kpi-label">📊 Risque moyen</div>'
+        st.markdown(f'<div class="kpi-card"><div class="kpi-label">{icon("trend")} Risque moyen</div>'
                     f'<div class="kpi-value">{avg_risk:.1f}%</div></div>', unsafe_allow_html=True)
 
     col_a, col_b = st.columns(2)
@@ -387,18 +476,20 @@ elif page == "Analyses":
         contract_dist = df["contract"].value_counts()
         fig1 = px.bar(contract_dist, orientation="h",
                       labels={"value": "Clients", "index": "Contrat"},
-                      color_discrete_sequence=["#1a3c6e"])
-        fig1.update_layout(title="Répartition par contrat", height=240, margin=dict(l=0, r=0, t=40, b=0))
+                      color_discrete_sequence=["#1c3d5a"])
+        fig1.update_layout(title="Répartition par contrat", height=240, margin=dict(l=0, r=0, t=40, b=0),
+                           showlegend=False, plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
         st.plotly_chart(fig1, use_container_width=True)
 
     with col_b:
         payment_dist = df["payment"].value_counts()
         fig2 = px.pie(values=payment_dist.values, names=payment_dist.index,
-                      color_discrete_sequence=px.colors.sequential.Blues_r)
-        fig2.update_layout(title="Mode de paiement", height=240, margin=dict(l=0, r=0, t=40, b=0))
+                      color_discrete_sequence=["#1c3d5a", "#64748b", "#94a3b8", "#cbd5e1"])
+        fig2.update_layout(title="Mode de paiement", height=240, margin=dict(l=0, r=0, t=40, b=0),
+                           paper_bgcolor="rgba(0,0,0,0)")
         st.plotly_chart(fig2, use_container_width=True)
 
-    st.markdown('<div class="section-header">📋 Historique complet</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="section-header">{icon("list")} Historique complet</div>', unsafe_allow_html=True)
     display_cols = ["date", "contract", "tenure", "payment", "monthly", "risk_score", "statut"]
     rename_map = {"date": "Date", "contract": "Contrat", "tenure": "Mois",
                   "payment": "Paiement", "monthly": "Mensuel", "risk_score": "Risque", "statut": "Statut"}
@@ -410,5 +501,5 @@ elif page == "Analyses":
     st.dataframe(df_display, use_container_width=True, hide_index=True)
 
     csv = df.to_csv(index=False).encode("utf-8-sig")
-    st.download_button("📥 Télécharger (CSV)", data=csv, file_name="churn_predictions.csv",
+    st.download_button("Télécharger (CSV)", data=csv, file_name="churn_predictions.csv",
                        mime="text/csv", use_container_width=True)
