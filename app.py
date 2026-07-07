@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, field_validator
 import joblib
 import pandas as pd
@@ -14,6 +15,14 @@ SCALER_PATH = os.getenv("SCALER_PATH", "scaler_churn.pkl")
 METADATA_PATH = os.getenv("METADATA_PATH", "model_metadata.json")
 
 app = FastAPI(title="API de Prédiction du Churn Telecom", version="2.0.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 try:
     model = joblib.load(MODEL_PATH)
